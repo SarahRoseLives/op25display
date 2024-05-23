@@ -1,0 +1,137 @@
+MDScreen:
+    MDBottomNavigation:
+        id: panel
+        MDBottomNavigationItem:
+            name: "Screen1"
+            text: "Large Display"
+            icon: "monitor"
+            MDScreen:
+                BoxLayout:
+                    orientation: 'vertical'
+                    MDLabel:
+                        text: "[font=material]" + app.signal_icon + "[/font]SDR: RTL | LNA: 48 | SR: 2.e6"
+                        markup: True
+                        font_size: '30sp'
+                        halign: "center"
+                        size_hint_y: None
+                        height: self.texture_size[1]
+
+                    Label:
+                        text: '========== ' + app.time_text + ' =========='
+                        font_name: 'digital'  # Use a monospaced font
+                        font_size: '30sp'
+                        size_hint_y: None
+                        height: self.texture_size[1]
+                        halign: 'left'  # Left-align text
+                        valign: 'middle'
+
+                    Label:
+                        text: 'Connected to: OP25'
+                        font_name: 'digital'
+                        font_size: '25sp'
+                        size_hint_y: None
+                        height: self.texture_size[1]
+                        halign: 'left'  # Left-align text
+                        valign: 'middle'
+
+                    Widget:  # This widget takes the remaining space
+
+
+                    BoxLayout:
+                        orientation: 'vertical'
+                        size_hint_y: None
+                        height: self.minimum_height  # Adjusts height to the content
+                        padding: [100, 0]
+                        pos_hint: {'center_y': 0.5}  # Centers the BoxLayout vertically
+
+                        BoxLayout:
+                            orientation: 'vertical'
+                            size_hint_y: None
+                            height: self.minimum_height  # Adjusts height to the content
+
+
+                            Label:
+                                text: 'Local Group'
+                                id: system_county
+                                font_name: 'digital'
+                                font_size: '50sp'
+                                size_hint_y: None
+                                height: self.texture_size[1]
+                                halign: 'left'  # Left-align text
+                                valign: 'middle'
+                                on_touch_down: app.hold_talkgroup()
+
+                            Label:
+                                text: 'System Name'
+                                id: system_name
+                                font_name: 'digital'
+                                font_size: '50sp'
+                                size_hint_y: None
+                                height: self.texture_size[1]
+                                halign: 'left'  # Left-align text
+                                valign: 'middle'
+                                on_touch_down: app.hold_talkgroup()
+
+                            Label:
+                                text: 'No Active Calls'
+                                id: current_talkgroup
+                                font_name: 'digital'
+                                font_size: '50sp'
+                                size_hint_y: None
+                                height: self.texture_size[1]
+                                halign: 'left'  # Left-align text
+                                valign: 'middle'
+                                on_touch_down: app.hold_talkgroup()
+
+                    Widget:  # This widget takes the remaining space
+
+
+
+
+        MDBottomNavigationItem:
+            name: "screen5"
+            text: "Settings"
+            icon: "cog"
+            MDScreen:
+                ScrollView:
+                    GridLayout:
+                        id: settings_grid
+                        cols: 2
+                        padding: "10dp"
+                        spacing: "10dp"
+                        size_hint_y: None
+                        height: self.minimum_height
+
+                        Label:
+                            text: "OP25_SERVER"
+                            size_hint_y: None
+                            height: "40dp"
+                            halign: "right"
+                            valign: "middle"  # Vertical alignment to center the text vertically
+
+                        MDTextField:
+                            id: op25_server_textbox
+                            hint_text: "Enter OP25_SERVER address"
+                            helper_text: "OP25_SERVER"
+                            helper_text_mode: "on_focus"
+                            size_hint_y: None
+                            height: "40dp"
+                            multiline: False
+
+                        Label:
+                            text: "TIME24"
+                            size_hint_y: None
+                            height: "40dp"
+                            halign: "right"
+                            valign: "middle"  # Vertical alignment to center the text vertically
+
+                        MDCheckbox:
+                            id: time24_checkbox
+                            size_hint_y: None
+                            height: "40dp"
+
+                        Button:
+                            text: "Update Config"
+                            size_hint_y: None
+                            height: "40dp"
+                            on_release: app.update_config()  # Call update_config method
