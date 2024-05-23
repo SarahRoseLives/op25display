@@ -95,7 +95,8 @@ def run_loop(url):
         #print(latest_values)
         time.sleep(1)
 
-# Start the loop in a separate thread when the module is imported
-thread = threading.Thread(target=run_loop, args=("http://192.168.1.245:8080",))
-thread.daemon = True
-thread.start()
+# Function to initialize the thread with a given URL
+def initialize(url):
+    thread = threading.Thread(target=run_loop, args=(url,))
+    thread.daemon = True
+    thread.start()

@@ -18,7 +18,7 @@ TIME24 = config.get_bool(section='RCH', option='TIME24')
 
 # Define a global URL
 GLOBAL_OP25DATA = config.get(section='RCH', option='OP25_SERVER')
-
+updater.initialize(GLOBAL_OP25SERVER)
 
 class OutlinedBoxLayout(BoxLayout):
     def __init__(self, **kwargs):
