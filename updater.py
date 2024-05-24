@@ -2,7 +2,13 @@ import time
 import requests
 import threading
 
+# Global variable to track connection status
+connection_successful = False
+
+
 def jsoncmd(command, arg1, arg2, url):
+    global connection_successful
+
     try:
         # Define the JSON payload
         payload = [{"command": command, "arg1": arg1, "arg2": arg2}]
@@ -12,11 +18,15 @@ def jsoncmd(command, arg1, arg2, url):
 
         # Check if the response status code is 200 (OK)
         if response.status_code == 200:
+            connection_successful = True
             return response.json()
         else:
+            connection_successful = False
             return {"error": f"Failed to retrieve data. Status Code: {response.status_code}"}
     except Exception as e:
+        connection_successful = False
         return {"error": f"An error occurred: {e}"}
+
 
 def get_latest_values(url):
     try:
@@ -25,7 +35,7 @@ def get_latest_values(url):
 
         # Check if response_data is empty
         if not response_data:
-            #print("Response data is empty")
+            # print("Response data is empty")
             return {}
 
         # Initialize a dictionary to store the latest values
@@ -88,15 +98,23 @@ def get_latest_values(url):
         print("An error occurred while fetching latest values:", e)
         return {}
 
+
 # Function to run in a loop
 def run_loop(url):
     while True:
         latest_values = get_latest_values(url)
-        #print(latest_values)
-        time.sleep(1)
+        # print(latest_values)
+        time.sleep(2)
+
 
 # Function to initialize the thread with a given URL
 def initialize(url):
     thread = threading.Thread(target=run_loop, args=(url,))
     thread.daemon = True
     thread.start()
+
+
+
+# Example of initializing with a URL
+# if __name__ == "__main__":
+#    initialize("http://192.168.1.245:8080")

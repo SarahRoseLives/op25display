@@ -7,6 +7,8 @@ from kivy.clock import Clock
 from kivy.core.text import LabelBase
 from random import random
 import time
+
+import updater
 from updater import get_latest_values
 
 # Local imports
@@ -17,8 +19,8 @@ config = configure.Configure('resources/config/config.ini')
 TIME24 = config.get_bool(section='RCH', option='TIME24')
 
 # Define a global URL
-GLOBAL_OP25DATA = config.get(section='RCH', option='OP25_SERVER')
-updater.initialize(GLOBAL_OP25SERVER)
+GLOBAL_OP25SERVER = config.get(section='RCH', option='OP25_SERVER')
+
 
 class OutlinedBoxLayout(BoxLayout):
     def __init__(self, **kwargs):
@@ -53,20 +55,39 @@ class MainApp(MDApp):
         LabelBase.register("digital", "resources/fonts/digital.ttf")
         LabelBase.register("material", "resources/fonts/material.ttf")
         self.system_county_label = root.ids.system_county  # Bind system_county_label to the label in KV
+
+        Clock.schedule_once(self.initialize_settings, 0.1)  # Initialize settings after a short delay
+
         Clock.schedule_once(self.delayed_theme_application)  # Apply dark theme after UI load
         Clock.schedule_interval(self.update_time, 1)  # Update time every second
         Clock.schedule_interval(self.update_large_display, 1) # Update large display once every second
-        Clock.schedule_interval(self.update_signal_icon, 1)  # Update large display once every second
+        Clock.schedule_interval(self.update_signal_icon, 5)  # Update large display once every second
+        Clock.schedule_interval(self.update_connection_status, 5)  # Update large display once every second
+
+
+
+        self.start_thread()
+
         return root
 
     def delayed_theme_application(self, dt):
         self.set_dark_theme()  # Change to dark theme after UI is built
 
+    # Called when you hit save in the settings tab
     def update_config(self):
         config.set('RCH', 'TIME24', str(self.root.ids.time24_checkbox.active))
         config.set('RCH', 'OP25_SERVER', self.root.ids.op25_server_textbox.text)
 
+    # Updater thread to grab data from OP25
+    def start_thread(self):
+        updater.initialize(GLOBAL_OP25SERVER)
 
+    # Load config data and fill settings screen with it
+    def initialize_settings(self, *args):
+        self.root.ids.op25_server_textbox.text = config.get(section='RCH', option='OP25_SERVER')
+        self.root.ids.time24_checkbox.active = config.get_bool(section='RCH', option='TIME24')
+
+    # Hold a talkgroup - currently just makes text red and keeps track otherwise the color
     def hold_talkgroup(self):
         if self.label_color_state:  # If the label is currently red
             # Change the color back to the original color
@@ -87,18 +108,21 @@ class MainApp(MDApp):
 
             self.label_color_state = True  # Update color state to red
 
+    # Application locks up when we start it in dark mode, so we set after rendering the UI
     def set_dark_theme(self, *args):
         self.theme_cls.theme_style = "Dark"  # Switch to dark theme
 
+    # Puts a clock on the Large Display function/UI it's also good to watch if the UI freezes
     def update_time(self, *args):
         if TIME24:
             self.time_text = time.strftime("%H:%M:%S")  # 24H Time
         else:
             self.time_text = time.strftime("%I:%M:%S %p")  # 12H Time
 
+    # Use bullshit values to make a mock signal RSSI indicator - change it plz
     def update_signal_icon(self, *args):
         try:
-            latest_values = get_latest_values(GLOBAL_OP25DATA)
+            latest_values = get_latest_values(GLOBAL_OP25SERVER)
             if latest_values and 'trunk_update' in latest_values:
                 tsbks_value = latest_values['trunk_update'].get('tsbks')
                 if tsbks_value is None:
@@ -110,7 +134,7 @@ class MainApp(MDApp):
                         self.signal_icon = "󰢾"
                     elif int(tsbks_value) >= 2000:
                         self.signal_icon = "󰢽"
-                    elif int(tsbks_value) >= 1000:
+                    elif int(tsbks_value) >= 400:
                         self.signal_icon = "󰢼"
 
 
@@ -119,11 +143,11 @@ class MainApp(MDApp):
         except Exception as e:
             print(f"Error updating signal icon: {e}")
 
-
+    # Updates the screen 'large display' with data from OP25
     def update_large_display(self, *args):
         try:
             # Call get_latest_values to retrieve the latest values
-            latest_values = get_latest_values(GLOBAL_OP25DATA)
+            latest_values = get_latest_values(GLOBAL_OP25SERVER)
 
             #print("Latest values:", latest_values)  # Add this line to see what latest_values contains
 
@@ -143,6 +167,18 @@ class MainApp(MDApp):
                 self.root.ids.current_talkgroup.text = "No Active Call"
         except:
             pass
+
+    # Updates the UI with details about connection status of OP25
+    def update_connection_status(self, *args):
+        status = self.root.ids.connected_msg.text
+        if updater.connection_successful:
+            if 'not connected' in status.lower():
+                self.root.ids.connected_msg.text = 'Connected to: OP25'
+        else:
+            if 'Connected to: OP25' in status:
+                self.root.ids.connected_msg.text = 'Connecting...'
+            if 'Connecting...' in status:
+                self.root.ids.connected_msg.text = 'Not Connected'
 
 if __name__ == '__main__':
     app = MainApp()
