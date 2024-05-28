@@ -4,4 +4,4 @@ The OP25Display App is a small section of a larger application intended to turn 
 
 There is some place holder text but this is pretty much it.
 
-If you're interested in seeing the application this is based on head over to: [SarahRoseLives/remotecontrolhead](https://github.com/SarahRoseLives/remotecontrolhead).
+If you're interested in seeing the application this is based on head over to: [SarahRoseLives/remotecontrolhead](https://github.com/SarahRoseLives/OP25MCH).
