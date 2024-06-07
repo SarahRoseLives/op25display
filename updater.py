@@ -14,7 +14,7 @@ def jsoncmd(command, arg1, arg2, url):
         payload = [{"command": command, "arg1": arg1, "arg2": arg2}]
 
         # Send the POST request
-        response = requests.post(url, json=payload)
+        response = requests.post(url, json=payload, timeout=1)
 
         # Check if the response status code is 200 (OK)
         if response.status_code == 200:
